@@ -2,6 +2,14 @@ const express = require("express");
 const res = require("express/lib/response");
 const app = express();
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("../../code-library-ca17a-firebase-adminsdk-y3x87-9d67b37634.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
@@ -25,77 +33,74 @@ const codeblocks = [
   },
 ];
 
-app.get("/", (req, res) => {
-  console.log("GET /");
+// app.get("/", (req, res) => {
+//   console.log("GET /");
 
-  res.send("Hello les devs");
+//   res.send("Hello les devs");
+// });
+
+// response type http://localhost:3001/codeblocks?id=2
+app.get("/codeblocks", (req, res) => {
+  const { id } = req.query;
+
+  const result =
+    id === undefined || id === ""
+      ? codeblocks
+      : codeblocks.filter((codeblock) => codeblock.id === parseInt(id));
+
+  res.status(200).json(result);
 });
 
-// http://localhost:3001/codeblocks?id=2
-// app.get("/codeblocks", (req, res) => {
-//   const { id } = req.query;
+app.post("/codeblocks", (req, res) => {
+  const codeblocksToSave = req.body;
 
-//   const result =
-//     id === undefined
-//       ? codeblocks
-//       : codeblocks.filter((codeblock) => codeblock.id === parseInt(id));
+  const newCodeblocks = codeblocksToSave.map((codeblock) => {
+    const lastCodeblock = codeblocks.reduce((max, obj) =>
+      max.id > obj.id ? max : obj
+    );
 
-//   res.status(200).json(result);
-// });
+    codeblock.id = lastCodeblock.id + 1;
+    codeblocks.push(codeblock);
 
-// app.post("/users", (req, res) => {
-//   const usersToSave = req.body;
+    return codeblocks;
+  });
 
-// const newUsers = [];
+  res.json(newCodeblocks);
+});
 
-// for (const user of usersToSave) {
-//   const lastUser = users.reduce((max, obj) => (max.id > obj.id ? max : obj));
+app.put("/codeblocks/:id", (req, res) => {
+  const { id } = req.params;
+  const { title, tag, code, created_at, update_at } = req.body;
 
-//   user.id = lastUser.id + 1;
-//   newUsers.push(user);
-//   users.push(user);
-// }
+  const codeblock = codeblocks.find(
+    (codeblock) => codeblock.id === parseInt(id)
+  );
 
-//   const newUsers = usersToSave.map((user) => {
-//     const lastUser = users.reduce((max, obj) =>
-//       max.id > obj.id ? max : obj
-//     );
+  if (codeblock) {
+    codeblock.title = title;
+    codeblock.tag = tag;
+    codeblock.code = code;
+    codeblock.created_at = created_at;
+    codeblock.update_at = update_at;
+  }
 
-//     user.id = lastUser.id + 1;
-//     users.push(user);
+  res.json({ codeblock });
+});
 
-//     return users;
-//   });
+app.delete("/codeblocks/:id", (req, res) => {
+  const { id } = req.params;
 
-//   res.json(newUsers);
-// });
+  const codeblock = codeblocks.find(
+    (codeblock) => codeblock.id === parseInt(id)
+  );
 
-// app.put("/users/:id", (req, res) => {
-//   const { id } = req.params;
-//   const { name, email } = req.body;
+  if (codeblock) {
+    codeblocks.splice(codeblocks.indexOf(codeblock), 1);
+  }
 
-//   const user = users.find((user) => user.id === parseInt(id));
+  res.status(201).json([]);
+});
 
-//   if (user) {
-//     user.name = name;
-//     user.email = email;
-//   }
-
-//   res.json({ user });
-// });
-
-// app.delete("/users/:id", (req, res) => {
-//   const { id } = req.params;
-
-//   const user = users.find((user) => user.id === parseInt(id));
-
-//   if (user) {
-//     user.splice(users.indexOf(user), 1);
-//   }
-
-//   res.status(201).json([]);
-// });
-
-// app.listen(3000, () => {
-//   console.log("Coucou les devs");
-// });
+app.listen(3001, () => {
+  console.log("Coucou les devs");
+});
