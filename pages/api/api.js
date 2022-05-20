@@ -1,106 +1,101 @@
+const { db } = require("../../firebase");
+
 const express = require("express");
 const res = require("express/lib/response");
 const app = express();
 
-var admin = require("firebase-admin");
-
-var serviceAccount = require("../../code-library-ca17a-firebase-adminsdk-y3x87-9d67b37634.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-// Database
-const codeblocks = [
-  {
-    id: 1,
-    title: "requestAPI",
-    tag: "[request, api]",
-    code: "une requete api",
-    created_at: "",
-    update_at: "",
-  },
-  {
-    id: 2,
-    title: "un code parfait",
-    tag: "[code, parfait]",
-    code: "du code parfait",
-    created_at: "",
-    update_at: "",
-  },
-];
-
-// app.get("/", (req, res) => {
-//   console.log("GET /");
-
-//   res.send("Hello les devs");
-// });
-
 // response type http://localhost:3001/codeblocks?id=2
-app.get("/codeblocks", (req, res) => {
+app.get("/codeblocks", async (req, res) => {
   const { id } = req.query;
 
-  const result =
-    id === undefined || id === ""
-      ? codeblocks
-      : codeblocks.filter((codeblock) => codeblock.id === parseInt(id));
+  const codeblockRef = db.collection("codeblocks");
 
-  res.status(200).json(result);
+  const codeblocks = [];
+
+  if (id !== undefined && id !== "") {
+    const codeblock = await codeblockRef.doc(id).get();
+
+    codeblocks.push({
+      id: codeblock.id,
+      ...codeblock.data(),
+    });
+  } else {
+    const codeblockDocs = await codeblockRef.get();
+
+    for (doc of codeblockDocs.docs) {
+      codeblocks.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    }
+  }
+
+  res.json(codeblocks);
 });
 
-app.post("/codeblocks", (req, res) => {
+app.post("/codeblocks", async (req, res) => {
   const codeblocksToSave = req.body;
 
-  const newCodeblocks = codeblocksToSave.map((codeblock) => {
-    const lastCodeblock = codeblocks.reduce((max, obj) =>
-      max.id > obj.id ? max : obj
-    );
-
-    codeblock.id = lastCodeblock.id + 1;
-    codeblocks.push(codeblock);
-
-    return codeblocks;
-  });
+  const newCodeblocks = await Promise.all(
+    codeblocksToSave.map(async (codeblock) => {
+      let docRef = { id: null };
+      try {
+        docRef = await db.collection("codeblocks").add({
+          title: codeblock.title,
+          tag: codeblock.tag,
+          code: codeblock.code,
+          CAT: codeblock.CAT,
+          UAT: codeblock.UAT,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      return { id: docRef.id, ...codeblock };
+    })
+  );
 
   res.json(newCodeblocks);
 });
 
-app.put("/codeblocks/:id", (req, res) => {
+app.put("/codeblocks/:id", async (req, res) => {
   const { id } = req.params;
-  const { title, tag, code, created_at, update_at } = req.body;
+  const codeblocksToUpdate = req.body;
 
-  const codeblock = codeblocks.find(
-    (codeblock) => codeblock.id === parseInt(id)
+  var codeblocksToUpdateRef = await db.collection("codeblocks").doc(id).get();
+
+  const updateCodeblocks = await Promise.all(
+    codeblocksToUpdate.map(async (codeblockUpdate) => {
+      try {
+        codeblocksToUpdateRef.ref.update({
+          title: codeblockUpdate.title,
+          tag: codeblockUpdate.tag,
+          code: codeblockUpdate.code,
+          CAT: codeblockUpdate.CAT,
+          UAT: codeblockUpdate.UAT,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      return { id, ...codeblockUpdate };
+    })
   );
 
-  if (codeblock) {
-    codeblock.title = title;
-    codeblock.tag = tag;
-    codeblock.code = code;
-    codeblock.created_at = created_at;
-    codeblock.update_at = update_at;
-  }
-
-  res.json({ codeblock });
+  res.json(updateCodeblocks);
 });
 
-app.delete("/codeblocks/:id", (req, res) => {
+app.delete("/codeblocks/:id", async (req, res) => {
   const { id } = req.params;
 
-  const codeblock = codeblocks.find(
-    (codeblock) => codeblock.id === parseInt(id)
-  );
+  const deleteCodeblock = await db.collection("codeblocks").doc(id).get();
 
-  if (codeblock) {
-    codeblocks.splice(codeblocks.indexOf(codeblock), 1);
+  if (deleteCodeblock.exists) {
+    await deleteCodeblock.ref.delete();
   }
 
   res.status(201).json([]);
 });
 
-app.listen(3001, () => {
-  console.log("Coucou les devs");
-});
+app.listen(3001, () => {});
