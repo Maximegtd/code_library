@@ -1,0 +1,46 @@
+.block {
+  display: flex;
+  flex-direction: column;
+
+  width: 60%;
+
+  margin: 1rem;
+  padding: 1rem 1rem 1rem 2rem;
+
+  color: white;
+  background-color: #1e3a8a;
+
+  border-radius: 17px;
+}
+
+.blockTitle h1 {
+  font-size: 25px;
+  margin: 1rem 0rem 0rem 0rem;
+  text-align: left;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.seeMoreButton {
+  background-color: rgb(154, 154, 154);
+  width: 5rem;
+  height: 2.5rem;
+  font-size: 15px;
+}
+
+.content {
+  display: flex;
+}
+
+.copyButton {
+  background-color: transparent;
+  width: 150px;
+  height: 40px;
+}
+
+.copyIcon {
+  width: 30px;
+  height: 40px; 
+  color: rgb(255, 255, 255);
+}
