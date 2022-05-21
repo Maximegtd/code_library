@@ -31,8 +31,5 @@ yarn-error.log*
 # vercel
 .vercel
 
-# firebase
-firebase-config.js
-
-# clés firebase
+# BDD KEY
 code-library-ca17a-firebase-adminsdk-y3x87-9d67b37634.json
