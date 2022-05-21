@@ -31,7 +31,12 @@ export default function Home() {
       <Header />
       <div className={styles.content}>
         {codeblockArray.map((c) => (
-          <Codeblock id={c.id} title={c.title} codeBlock={c.codeBlock} />
+          <Codeblock
+            key={c.id}
+            id={c.id}
+            title={c.title}
+            codeBlock={c.codeBlock}
+          />
         ))}
       </div>
     </div>
