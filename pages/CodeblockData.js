@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useParams } from "react-router-dom";
 
 //STYLES
 import styles from "../styles/codeblockData.module.css";
@@ -7,16 +8,15 @@ import styles from "../styles/codeblockData.module.css";
 import { BsArrowLeft } from "react-icons/bs";
 
 export default function CodeblockData() {
+  const id = useParams().id;
+
   return (
     <div>
       <div className={styles.header}>
         <Link href={"/"}>
           <BsArrowLeft className={styles.returnIcon} />
         </Link>
-        <h1>
-          <span className={styles.codeSpan}>CODE</span>
-          <span className={styles.blockSpan}>BLOCK</span> TITLE
-        </h1>
+        <h1></h1>
       </div>
       <div className={styles.codeBlock}>
         <p>

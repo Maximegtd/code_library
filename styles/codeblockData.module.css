@@ -20,14 +20,6 @@
   cursor: pointer;
 }
 
-.codeSpan {
-  color: #4AEC46;
-}
-
-.blockSpan {
-  color: #FF3B3B;
-}
-
 .codeBlock {
   width: 75%;
   height: 75%;
