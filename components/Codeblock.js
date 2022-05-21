@@ -13,7 +13,7 @@ export default function Codeblock({ id, title, codeBlock }) {
       <div className={styles.blockTitle}>
         <h1>
           {title}
-          <Link href={`/${id}`}>
+          <Link href={`/CodeblockData`}>
             <Button className={styles.seeMoreButton}>Voir plus</Button>
           </Link>
         </h1>

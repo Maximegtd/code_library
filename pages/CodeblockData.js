@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useParams } from "react-router-dom";
+// import { useParams } from "react-router-dom";
 
 //STYLES
 import styles from "../styles/codeblockData.module.css";
@@ -8,7 +8,8 @@ import styles from "../styles/codeblockData.module.css";
 import { BsArrowLeft } from "react-icons/bs";
 
 export default function CodeblockData() {
-  const id = useParams().id;
+  // const params = useParams();
+  // const id = params.id;
 
   return (
     <div>
